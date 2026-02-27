@@ -34,6 +34,7 @@ class Aspirante(db.Model):
     __tablename__ = 'aspirantes'
     id = db.Column(db.Integer, primary_key=True)
     consecutivo = db.Column(db.Integer, unique=True)
+    folio = db.Column(db.String(20), unique=True)  # ← NUEVO CAMPO DE FOLIO
     nombre = db.Column(db.String(100))
     paterno = db.Column(db.String(100))
     materno = db.Column(db.String(100))
@@ -71,25 +72,42 @@ def generar_consecutivo():
     ultimo = db.session.query(db.func.max(Aspirante.consecutivo)).scalar()
     return 1000 if not ultimo else ultimo + 1
 
+def generar_folio():
+    """Genera un folio aleatorio de 8 caracteres alfanuméricos"""
+    while True:
+        # Formato: 2 letras + 4 números + 2 letras (ej: AB1234CD)
+        letras1 = ''.join(random.choices(string.ascii_uppercase, k=2))
+        numeros = ''.join(random.choices(string.digits, k=4))
+        letras2 = ''.join(random.choices(string.ascii_uppercase, k=2))
+        folio = f"{letras1}{numeros}{letras2}"
+        
+        # Verificar que no exista (por si acaso)
+        existe = Aspirante.query.filter_by(folio=folio).first()
+        if not existe:
+            return folio
+
 def generar_password():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
 
 def generar_referencia(consecutivo):
     return f"BBVA{datetime.now().year}{consecutivo}"
 
-def enviar_correo(destinatario, password):
+def enviar_correo(destinatario, password, folio):  # ← AGREGADO FOLIO COMO PARÁMETRO
     msg = EmailMessage()
-    msg['Subject'] = 'Clave de acceso - Sistema Aspirantes'
+    msg['Subject'] = 'Clave de acceso y FOLIO - Sistema Aspirantes'
     msg['From'] = app.config['MAIL_USERNAME']
     msg['To'] = destinatario
 
     msg.set_content(f"""
 Bienvenido al Sistema de Aspirantes
 
+Su FOLIO de registro es: {folio}
 Su clave de acceso es: {password}
 
 Puede iniciar sesión en:
 http://127.0.0.1:5000/login
+
+Guarde su folio para cualquier aclaración.
 """)
 
     with smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT']) as server:
@@ -104,6 +122,7 @@ def generar_pdf(aspirante, referencia):
     ruta_pdf = f"pdfs/solicitud_{aspirante.consecutivo}.pdf"
     c = canvas.Canvas(ruta_pdf, pagesize=letter)
 
+    c.drawString(50, 770, f"FOLIO: {aspirante.folio}")  # ← AGREGADO FOLIO AL PDF
     c.drawString(50, 750, f"Solicitud No: {aspirante.consecutivo}")
     c.drawString(50, 730, f"Nombre: {aspirante.nombre} {aspirante.paterno} {aspirante.materno}")
     c.drawString(50, 710, f"Programa: {aspirante.programa}")
@@ -118,7 +137,7 @@ def generar_pdf(aspirante, referencia):
     return ruta_pdf
 
 # =====================
-# RUTA REGISTRO
+# RUTA REGISTRO (MODIFICADA CON FOLIO)
 # =====================
 
 @app.route('/', methods=['GET','POST'])
@@ -133,6 +152,7 @@ def registro():
             return redirect(url_for('registro'))
 
         consecutivo = generar_consecutivo()
+        folio = generar_folio()  # ← GENERAR FOLIO ALEATORIO
         password = generar_password()
 
         carpeta_fotos = "static/fotos"
@@ -185,8 +205,10 @@ def registro():
 
         fecha_convertida = datetime.strptime(request.form['fecha'], "%Y-%m-%d").date()
 
+        # IMPORTANTE: Usando los nombres correctos del HTML
         aspirante = Aspirante(
             consecutivo=consecutivo,
+            folio=folio,
             nombre=request.form['nombre'],
             paterno=request.form['paterno'],
             materno=request.form['materno'],
@@ -220,7 +242,8 @@ def registro():
         db.session.add(pago)
         db.session.commit()
 
-        enviar_correo(correo, password)
+        # ENVIAR CORREO CON FOLIO Y CONTRASEÑA
+        enviar_correo(correo, password, folio)  # ← PASAR FOLIO A LA FUNCIÓN
 
         pdf_path = generar_pdf(aspirante, referencia)
 
@@ -245,7 +268,9 @@ def login():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template("dashboard.html")
+    # OPCIONAL: Mostrar el folio del aspirante en el dashboard
+    aspirante = Aspirante.query.filter_by(id=current_user.aspirante_id).first()
+    return render_template("dashboard.html", aspirante=aspirante)
 
 @app.route('/logout')
 @login_required

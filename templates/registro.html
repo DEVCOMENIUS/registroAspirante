@@ -9,158 +9,156 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <div class="container mt-5">
-        <h2 class="text-center mb-4">Registro de Aspirante</h2>
+    <!-- Header más pequeño y elegante -->
+    <div class="header-minimal">
+        <div class="header-content">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <h1>Registro de aspirantes</h1>
+            <p>Periodo de pre inscripcion</p>
+        </div>
+    </div>
 
+    <div class="container-compact">
         <!-- Mensajes flash -->
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
-        <div class="alert alert-{{category}}">{{ message }}</div>
+        <div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-circle-info me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         {% endfor %}
         {% endif %}
         {% endwith %}
 
-        <form id="formRegistro" method="POST" enctype="multipart/form-data" novalidate>
-
-            <!-- Nombres y apellidos -->
-            <div class="row mb-3">
-                <div class="col position-relative">
-                    <label class="form-label">Apellido Paterno
-                        <i class="fa-solid fa-circle-info ms-1 text-primary"
-                           data-bs-toggle="tooltip"
-                           data-bs-placement="right"
-                           title="Ingrese su apellido paterno en mayusculas y sin acentos."></i>
-                    </label>
-                    <input type="text" class="form-control" name="paterno" placeholder="Ej. PEREZ" required>
-                </div>
-                <div class="col position-relative">
-                    <label class="form-label">Apellido Materno
-                        <i class="fa-solid fa-circle-info ms-1 text-primary"
-                           data-bs-toggle="tooltip"
-                           data-bs-placement="right"
-                           title="Ingrese su apellido materno en mayusculas y sin acentos."></i>
-                    </label>
-                    <input type="text" class="form-control" name="materno" placeholder="Ej. LOPEZ" required>
-                </div>
-                <div class="col position-relative">
-                    <label class="form-label">Nombre
-                        <i class="fa-solid fa-circle-info ms-1 text-primary"
-                           data-bs-toggle="tooltip"
-                           data-bs-placement="right"
-                           title="Ingrese su nombre(s) en mayusculas y sin acentos."></i>
-                    </label>
-                    <input type="text" class="form-control" name="nombre" placeholder="Ej: JUAN" required>
+        <!-- Tarjeta compacta -->
+        <div class="card-compact">
+            <!-- Avatar -->
+            <div class="avatar-mini">
+                <div class="avatar-circle-mini" id="avatarPreview">
+                    <i class="fa-solid fa-user"></i>
                 </div>
             </div>
 
-            <!-- Correo electrónico -->
-            <div class="row mb-3">
-                <div class="col position-relative">
-                    <label class="form-label">Correo electrónico
-                        <i class="fa-solid fa-circle-info ms-1 text-primary"
-                           data-bs-toggle="tooltip"
-                           data-bs-placement="right"
-                           title="Ingrese un correo electrónico vigente que consultes con frecuencia ya que se te enviara la clave de acceso."></i>
-                    </label>
-                    <input type="email" class="form-control" name="correo" placeholder="ejemplo@correo.com" required>
-                </div>
-                <div class="col position-relative">
-                    <label class="form-label">Confirmar correo
-                        <i class="fa-solid fa-circle-info ms-1 text-primary"
-                           data-bs-toggle="tooltip"
-                           data-bs-placement="right"
-                           title="Ingrese nuevamente su correo electrónico para confirmarlo, verifique cuidadosamente."></i>
-                    </label>
-                    <input type="email" class="form-control" name="correo_confirm" placeholder="ejemplo@correo.com" required>
-                </div>
-            </div>
+            <form id="formRegistro" method="POST" enctype="multipart/form-data" novalidate>
+                <div class="row g-2">
+                    <!-- Nombres y apellidos -->
+                    <div class="col-md-4">
+                        <div class="input-group-compact">
+                            <i class="fa-solid fa-user-tag input-icon-mini"></i>
+                            <input type="text" class="form-control form-control-sm" name="paterno" placeholder="paterno" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group-compact">
+                            <i class="fa-solid fa-user-tag input-icon-mini"></i>
+                            <input type="text" class="form-control form-control-sm" name="materno" placeholder="materno" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group-compact">
+                            <i class="fa-solid fa-user input-icon-mini"></i>
+                            <input type="text" class="form-control form-control-sm" name="nombre" placeholder="Nombre(s)" required>
+                        </div>
+                    </div>
 
-            <!-- Fecha de nacimiento y sexo -->
-            <div class="row mb-3">
-                <div class="col position-relative">
-                    <label class="form-label">Fecha de nacimiento
-                    </label>
-                    <input type="date" class="form-control" name="fecha" required>
+                    <!-- Correos -->
+                    <div class="col-md-6">
+                        <div class="input-group-compact">
+                            <i class="fa-solid fa-envelope input-icon-mini"></i>
+                            <input type="email" class="form-control form-control-sm" name="correo" placeholder="Correo electrónico" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group-compact">
+                            <i class="fa-solid fa-check-double input-icon-mini"></i>
+                            <input type="email" class="form-control form-control-sm" name="correo_confirm" placeholder="Confirmar correo" required>
+                        </div>
+                    </div>
+
+                    <!-- Fecha, Sexo, Programa -->
+                    <div class="col-md-4">
+                        <div class="input-group-compact">
+                            <i class="fa-solid fa-calendar input-icon-mini"></i>
+                            <input type="date" class="form-control form-control-sm" name="fecha" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group-compact">
+                            <i class="fa-solid fa-venus-mars input-icon-mini"></i>
+                            <select class="form-select form-select-sm" name="sexo" required>
+                                <option value="" selected disabled>Genero</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Femenino">Femenino</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group-compact">
+                            <i class="fa-solid fa-graduation-cap input-icon-mini"></i>
+                            <select class="form-select form-select-sm" name="programa" required>
+                                <option value="" selected disabled>Programa a Estudiar</option>
+                                <option value="Ingeniería en Sistemas">Ingenieria N</option>
+                                <option value="Licenciatura en Administración">Ingenieria N</option>
+                                <option value="Medicina">Licenciatura</option>
+                                <option value="Derecho">Licenciatura</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- CURP -->
+                    <div class="col-12">
+                        <div class="input-group-compact">
+                            <i class="fa-solid fa-qrcode input-icon-mini"></i>
+                            <input type="text" class="form-control form-control-sm" name="curp" maxlength="18" placeholder="CURP (18 caracteres)" required>
+                        </div>
+                    </div>
+
+                    <!-- Foto compacta -->
+                    <div class="col-12">
+                        <div class="photo-mini-section">
+                            <div class="photo-preview-mini">
+                                <img id="previewFoto" src="#" alt="Preview" class="photo-preview-img">
+                                <div class="photo-preview-placeholder-mini" id="placeholderPreview">
+                                    <i class="fa-solid fa-camera"></i>
+                                </div>
+                            </div>
+                            <div class="photo-controls-mini">
+                                <div class="file-input-mini">
+                                    <input type="file" class="file-input-hidden" name="foto" accept="image/*" id="fotoInput">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('fotoInput').click()">
+                                        <i class="fa-solid fa-cloud-arrow-up"></i> Subir
+                                    </button>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-sm" id="btnTomarFoto">
+                                    <i class="fa-solid fa-camera"></i> Tomar
+                                </button>
+                            </div>
+                        </div>
+                        <span class="file-name-mini" id="fileName">Ningún archivo seleccionado</span>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="col-12 mt-3">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-fill">
+                                <i class="fa-solid fa-file-circle-plus"></i> Generar
+                            </button>
+                            <a href="/login" class="btn btn-outline-primary flex-fill">
+                                <i class="fa-solid fa-right-to-bracket"></i> Iniciar
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <div class="col position-relative">
-                    <label class="form-label">Sexo
-                    </label>
-                    <select class="form-select" name="sexo" required>
-                        <option value="">Seleccione...</option>
-                        <option value="Masculino">Masculino</option>
-                        <option value="Femenino">Femenino</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Programa académico -->
-            <div class="mb-3 position-relative">
-                <label class="form-label">Programa académico
-                    <i class="fa-solid fa-circle-info ms-1 text-primary"
-                       data-bs-toggle="tooltip"
-                       data-bs-placement="right"
-                       title="Seleccione el programa académico al que desea postularse, verifique que sea el correcto."></i>
-                </label>
-                <select class="form-select" name="programa" required>
-                    <option value="">Seleccione un programa</option>
-                    <option value="Ingeniería en Sistemas">INGENIERIA EN SISTEMAS</option>
-                    <option value="Licenciatura en Administración">LICENCIATURA EN ADMINISTRACION</option>
-                    <option value="Medicina">MEDICINA</option>
-                    <option value="Derecho">DERECHO</option>
-                </select>
-            </div>
-
-            <!-- CURP -->
-            <div class="mb-3 position-relative">
-                <label class="form-label">CURP
-                    <i class="fa-solid fa-circle-info ms-1 text-primary"
-                       data-bs-toggle="tooltip"
-                       data-bs-placement="right"
-                       title="Ingrese su CURP de 18 caracteres."></i>
-                </label>
-                <input type="text" class="form-control" name="curp" maxlength="18" placeholder="Ej. PEJL920101HDFXXX09" required>
-            </div>
-
-            <!-- Foto de perfil -->
-            <div class="mb-3 position-relative">
-                <label class="form-label">Foto de perfil
-                    <i class="fa-solid fa-circle-info ms-1 text-primary"
-                       data-bs-toggle="tooltip"
-                       data-bs-placement="right"
-                       title="Seleccione una foto reciente de perfil o tome una foto."></i>
-                </label>
-                <input type="file" class="form-control" name="foto" accept="image/*" id="fotoInput">
-                <button type="button" class="btn btn-primary mt-2" id="btnTomarFoto">
-                    <i class="fa-solid fa-camera"></i> Tomar foto
-                </button>
-                <div class="mt-2">
-                    <img id="previewFoto" src="#" alt="Vista previa" style="display:none; width:150px; height:150px; border-radius:50%;">
-                </div>
-            </div>
-
-            <!-- Botones -->
-            <div class="d-flex flex-column flex-md-row justify-content-between mb-3 gap-2">
-                <button type="submit" class="btn btn-success w-100">
-                    <i class="fa-solid fa-file-circle-plus"></i> Generar solicitud
-                </button>
-                <a href="/login" class="btn btn-outline-primary w-100">
-                    <i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesión
-                </a>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        // Inicializar tooltips
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-    </script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

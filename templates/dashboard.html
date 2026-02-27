@@ -4,129 +4,540 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel del Aspirante</title>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 /* ====== GENERAL ====== */
-body {
+* {
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f6f9;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-/* ====== NAVBAR ====== */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #f0f4f8 0%, #e6ecf4 100%);
+    min-height: 100vh;
+}
+
+/* ====== NAVBAR BLANCA ====== */
 .navbar {
-    background: #1f2a38;
-    padding: 15px 40px;
+    background: white;
+    padding: 0 40px;
+    height: 70px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: #fff;
+    color: #1e293b;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid #e9ecef;
 }
 
-.navbar h1 {
-    font-size: 1.2rem;
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.navbar-brand i {
+    font-size: 1.8rem;
+    color: #1976d2;
+    background: #f0f7ff;
+    padding: 8px;
+    border-radius: 12px;
+}
+
+.navbar-brand h1 {
+    font-size: 1.3rem;
     margin: 0;
-    font-weight: 500;
-    letter-spacing: 1px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: #1e293b;
 }
 
-.navbar a {
-    color: #fff;
+.navbar-user {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8fafc;
+    padding: 8px 16px;
+    border-radius: 50px;
+    border: 1px solid #e9ecef;
+}
+
+.user-badge i {
+    font-size: 1rem;
+    color: #1976d2;
+}
+
+.user-badge span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #475569;
+}
+
+/* Botón de cerrar sesión BLANCO */
+.btn-logout {
+    color: #64748b;
     text-decoration: none;
-    background: #dc3545;
+    background: white;
     padding: 8px 18px;
     border-radius: 50px;
     font-size: 0.9rem;
-    transition: 0.3s;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #e2e8f0;
 }
 
-.navbar a:hover {
-    background: #b02a37;
+.btn-logout:hover {
+    background: #1976d2;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.2);
+    border-color: #1976d2;
 }
 
-/* ====== CONTENIDO ====== */
+.btn-logout i {
+    font-size: 0.9rem;
+}
+
+/* Línea separadora */
+.navbar-user::before {
+    content: '';
+    width: 1px;
+    height: 30px;
+    background: #e2e8f0;
+    margin-right: 10px;
+}
+
+/* ====== CONTENEDOR PRINCIPAL ====== */
 .container {
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: calc(100vh - 70px);
-    padding: 20px;
+    align-items: flex-start;
+    min-height: calc(100vh - 70px);
+    padding: 40px 20px;
 }
 
+/* ====== CARD A LO ANCHO ====== */
 .card {
     background: #fff;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.08);
-    max-width: 500px;
+    padding: 35px 40px;
+    border-radius: 24px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+    max-width: 850px;
     width: 100%;
-    text-align: center;
-    transition: 0.3s;
+    transition: all 0.3s ease;
+    border: 1px solid #edf2f7;
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 25px 50px rgba(0,0,0,0.12);
+    box-shadow: 0 20px 45px rgba(0,0,0,0.08);
 }
 
-.card h2 {
-    margin-bottom: 10px;
-    color: #1f2a38;
-}
-
-.card p {
-    color: #6c757d;
+/* ====== HEADER DE LA CARD ====== */
+.card-header {
+    text-align: center;
     margin-bottom: 30px;
 }
 
-/* ====== BOTONES ====== */
-.btn {
-    display: inline-block;
-    margin: 8px;
-    padding: 12px 25px;
-    border-radius: 50px;
-    text-decoration: none;
+.card-header-icon {
+    width: 70px;
+    height: 70px;
+    background: #f0f7ff;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+}
+
+.card-header-icon i {
+    font-size: 2.2rem;
+    color: #1976d2;
+}
+
+.card h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.card-subtitle {
+    color: #64748b;
+    font-size: 1rem;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.card-subtitle i {
+    color: #10b981;
+    font-size: 0.9rem;
+}
+
+/* ====== INFO DEL ASPIRANTE (HORIZONTAL) ====== */
+.info-card {
+    background: #f8fafc;
+    border-radius: 20px;
+    padding: 25px;
+    margin: 25px 0;
+    border: 1px solid #e9ecef;
+}
+
+.info-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.info-header i {
+    font-size: 1.3rem;
+    color: #1976d2;
+    background: white;
+    padding: 10px;
+    border-radius: 12px;
+}
+
+.info-header h3 {
+    font-size: 1.1rem;
     font-weight: 600;
-    transition: 0.3s;
+    color: #334155;
+    margin: 0;
+}
+
+/* GRID HORIZONTAL - 2 COLUMNAS */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background: white;
+    border-radius: 14px;
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.info-item:hover {
+    border-color: #1976d2;
+    box-shadow: 0 4px 10px rgba(25, 118, 210, 0.05);
+}
+
+.info-label {
+    min-width: 100px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-label i {
+    font-size: 0.8rem;
+    color: #1976d2;
+    width: 18px;
+}
+
+.info-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1e293b;
+    flex: 1;
+}
+
+.folio-value {
+    font-family: monospace;
+    font-size: 1.1rem;
+    color: #1976d2;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* ====== BOTONES DE ACCIÓN ====== */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 32px;
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    flex: 0 1 auto;
+    min-width: 180px;
+}
+
+.btn i {
+    font-size: 1.1rem;
 }
 
 .btn-primary {
-    background: linear-gradient(90deg, #0d6efd, #084298);
+    background: #1976d2;
     color: #fff;
+    border: 1px solid #1976d2;
 }
 
 .btn-primary:hover {
-    transform: scale(1.05);
+    background: #1565c0;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(25, 118, 210, 0.3);
 }
 
 .btn-outline {
-    border: 2px solid #0d6efd;
-    color: #0d6efd;
+    background: white;
+    color: #1976d2;
+    border: 1px solid #1976d2;
 }
 
 .btn-outline:hover {
-    background: #0d6efd;
-    color: #fff;
+    background: #f0f7ff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(25, 118, 210, 0.1);
+}
+
+/* ====== BADGE DE ESTADO ====== */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ecfdf5;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    color: #059669;
+    margin-top: 20px;
+    border: 1px solid #a7f3d0;
+}
+
+.status-badge i {
+    font-size: 0.7rem;
+    color: #10b981;
+}
+
+/* ====== ANIMACIONES ====== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.5s ease;
+}
+
+.info-item {
+    animation: fadeInUp 0.5s ease;
+    animation-fill-mode: both;
+}
+
+.info-item:nth-child(1) { animation-delay: 0.1s; }
+.info-item:nth-child(2) { animation-delay: 0.15s; }
+.info-item:nth-child(3) { animation-delay: 0.2s; }
+.info-item:nth-child(4) { animation-delay: 0.25s; }
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0 20px;
+    }
+    
+    .navbar-brand h1 {
+        font-size: 1rem;
+    }
+    
+    .navbar-brand i {
+        font-size: 1.4rem;
+        padding: 6px;
+    }
+    
+    .user-badge span {
+        display: none;
+    }
+    
+    .navbar-user::before {
+        display: none;
+    }
+    
+    .card {
+        padding: 25px;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .info-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .info-label {
+        min-width: auto;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+}
+
+/* ====== SCROLLBAR ====== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1976d2;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #1565c0;
 }
 </style>
-
 </head>
 <body>
 
-<!-- NAVBAR -->
+<!-- NAVBAR BLANCA -->
 <div class="navbar">
-    <h1>Sistema de Aspirantes</h1>
-    <a href="/logout">Cerrar sesión</a>
+    <div class="navbar-brand">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <h1>Sistema de Admisiones</h1>
+    </div>
+    
+    <div class="navbar-user">
+        <div class="user-badge">
+            <i class="fa-solid fa-user-graduate"></i>
+            <span>Aspirante</span>
+        </div>
+        <a href="/logout" class="btn-logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Cerrar sesión</span>
+        </a>
+    </div>
 </div>
 
-<!-- CONTENIDO -->
+<!-- CONTENIDO PRINCIPAL -->
 <div class="container">
     <div class="card">
-        <h2>Bienvenido al Sistema</h2>
-        <p>Desde aquí puedes consultar y descargar tu ficha de registro.</p>
+        <!-- Header con icono -->
+        <div class="card-header">
+            <div class="card-header-icon">
+                <i class="fa-solid fa-file-lines"></i>
+            </div>
+            <h2>¡Bienvenido!</h2>
+            <div class="card-subtitle">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>Tu registro está completo</span>
+            </div>
+        </div>
 
-        <a href="/ver_pdf" class="btn btn-outline">Ver Ficha (PDF)</a>
-        <a href="/descargar_pdf" class="btn btn-primary">Descargar Ficha</a>
+        <!-- Información del aspirante (formato horizontal) -->
+        {% if aspirante %}
+        <div class="info-card">
+            <div class="info-header">
+                <i class="fa-solid fa-id-card"></i>
+                <h3>Información de registro</h3>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fa-solid fa-qrcode"></i>
+                        FOLIO
+                    </span>
+                    <span class="info-value folio-value">{{ aspirante.folio }}</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fa-solid fa-hashtag"></i>
+                        Consecutivo
+                    </span>
+                    <span class="info-value">{{ aspirante.consecutivo }}</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fa-solid fa-user"></i>
+                        Nombre
+                    </span>
+                    <span class="info-value">{{ aspirante.nombre }} {{ aspirante.paterno }} {{ aspirante.materno }}</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fa-solid fa-book-open"></i>
+                        Programa
+                    </span>
+                    <span class="info-value">{{ aspirante.programa }}</span>
+                </div>
+            </div>
+            
+            <div class="status-badge">
+                <i class="fa-solid fa-circle"></i>
+                <span>Registro activo · {{ aspirante.folio }}</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Botones de acción -->
+        <div class="action-buttons">
+            <a href="/ver_pdf" class="btn btn-outline">
+                <i class="fa-solid fa-eye"></i>
+                Ver Ficha
+            </a>
+            <a href="/descargar_pdf" class="btn btn-primary">
+                <i class="fa-solid fa-download"></i>
+                Descargar
+            </a>
+        </div>
     </div>
 </div>
 
