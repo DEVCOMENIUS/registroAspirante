@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Aspirante</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Registro de Aspirante</h2>
+
+        <!-- Mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{category}}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <form id="formRegistro" method="POST" enctype="multipart/form-data" novalidate>
+
+            <!-- Nombres y apellidos -->
+            <div class="row mb-3">
+                <div class="col position-relative">
+                    <label class="form-label">Apellido Paterno
+                        <i class="fa-solid fa-circle-info ms-1 text-primary"
+                           data-bs-toggle="tooltip"
+                           data-bs-placement="right"
+                           title="Ingrese su apellido paterno en mayusculas y sin acentos."></i>
+                    </label>
+                    <input type="text" class="form-control" name="paterno" placeholder="Ej. PEREZ" required>
+                </div>
+                <div class="col position-relative">
+                    <label class="form-label">Apellido Materno
+                        <i class="fa-solid fa-circle-info ms-1 text-primary"
+                           data-bs-toggle="tooltip"
+                           data-bs-placement="right"
+                           title="Ingrese su apellido materno en mayusculas y sin acentos."></i>
+                    </label>
+                    <input type="text" class="form-control" name="materno" placeholder="Ej. LOPEZ" required>
+                </div>
+                <div class="col position-relative">
+                    <label class="form-label">Nombre
+                        <i class="fa-solid fa-circle-info ms-1 text-primary"
+                           data-bs-toggle="tooltip"
+                           data-bs-placement="right"
+                           title="Ingrese su nombre(s) en mayusculas y sin acentos."></i>
+                    </label>
+                    <input type="text" class="form-control" name="nombre" placeholder="Ej: JUAN" required>
+                </div>
+            </div>
+
+            <!-- Correo electrónico -->
+            <div class="row mb-3">
+                <div class="col position-relative">
+                    <label class="form-label">Correo electrónico
+                        <i class="fa-solid fa-circle-info ms-1 text-primary"
+                           data-bs-toggle="tooltip"
+                           data-bs-placement="right"
+                           title="Ingrese un correo electrónico vigente que consultes con frecuencia ya que se te enviara la clave de acceso."></i>
+                    </label>
+                    <input type="email" class="form-control" name="correo" placeholder="ejemplo@correo.com" required>
+                </div>
+                <div class="col position-relative">
+                    <label class="form-label">Confirmar correo
+                        <i class="fa-solid fa-circle-info ms-1 text-primary"
+                           data-bs-toggle="tooltip"
+                           data-bs-placement="right"
+                           title="Ingrese nuevamente su correo electrónico para confirmarlo, verifique cuidadosamente."></i>
+                    </label>
+                    <input type="email" class="form-control" name="correo_confirm" placeholder="ejemplo@correo.com" required>
+                </div>
+            </div>
+
+            <!-- Fecha de nacimiento y sexo -->
+            <div class="row mb-3">
+                <div class="col position-relative">
+                    <label class="form-label">Fecha de nacimiento
+                    </label>
+                    <input type="date" class="form-control" name="fecha" required>
+                </div>
+                <div class="col position-relative">
+                    <label class="form-label">Sexo
+                    </label>
+                    <select class="form-select" name="sexo" required>
+                        <option value="">Seleccione...</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Programa académico -->
+            <div class="mb-3 position-relative">
+                <label class="form-label">Programa académico
+                    <i class="fa-solid fa-circle-info ms-1 text-primary"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="right"
+                       title="Seleccione el programa académico al que desea postularse, verifique que sea el correcto."></i>
+                </label>
+                <select class="form-select" name="programa" required>
+                    <option value="">Seleccione un programa</option>
+                    <option value="Ingeniería en Sistemas">INGENIERIA EN SISTEMAS</option>
+                    <option value="Licenciatura en Administración">LICENCIATURA EN ADMINISTRACION</option>
+                    <option value="Medicina">MEDICINA</option>
+                    <option value="Derecho">DERECHO</option>
+                </select>
+            </div>
+
+            <!-- CURP -->
+            <div class="mb-3 position-relative">
+                <label class="form-label">CURP
+                    <i class="fa-solid fa-circle-info ms-1 text-primary"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="right"
+                       title="Ingrese su CURP de 18 caracteres."></i>
+                </label>
+                <input type="text" class="form-control" name="curp" maxlength="18" placeholder="Ej. PEJL920101HDFXXX09" required>
+            </div>
+
+            <!-- Foto de perfil -->
+            <div class="mb-3 position-relative">
+                <label class="form-label">Foto de perfil
+                    <i class="fa-solid fa-circle-info ms-1 text-primary"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="right"
+                       title="Seleccione una foto reciente de perfil o tome una foto."></i>
+                </label>
+                <input type="file" class="form-control" name="foto" accept="image/*" id="fotoInput">
+                <button type="button" class="btn btn-primary mt-2" id="btnTomarFoto">
+                    <i class="fa-solid fa-camera"></i> Tomar foto
+                </button>
+                <div class="mt-2">
+                    <img id="previewFoto" src="#" alt="Vista previa" style="display:none; width:150px; height:150px; border-radius:50%;">
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="d-flex flex-column flex-md-row justify-content-between mb-3 gap-2">
+                <button type="submit" class="btn btn-success w-100">
+                    <i class="fa-solid fa-file-circle-plus"></i> Generar solicitud
+                </button>
+                <a href="/login" class="btn btn-outline-primary w-100">
+                    <i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesión
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Inicializar tooltips
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    </script>
+</body>
+</html>

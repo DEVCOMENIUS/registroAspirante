@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel del Aspirante</title>
+
+<style>
+/* ====== GENERAL ====== */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f9;
+}
+
+/* ====== NAVBAR ====== */
+.navbar {
+    background: #1f2a38;
+    padding: 15px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+}
+
+.navbar h1 {
+    font-size: 1.2rem;
+    margin: 0;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+.navbar a {
+    color: #fff;
+    text-decoration: none;
+    background: #dc3545;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+
+.navbar a:hover {
+    background: #b02a37;
+}
+
+/* ====== CONTENIDO ====== */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 70px);
+    padding: 20px;
+}
+
+.card {
+    background: #fff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.12);
+}
+
+.card h2 {
+    margin-bottom: 10px;
+    color: #1f2a38;
+}
+
+.card p {
+    color: #6c757d;
+    margin-bottom: 30px;
+}
+
+/* ====== BOTONES ====== */
+.btn {
+    display: inline-block;
+    margin: 8px;
+    padding: 12px 25px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #0d6efd, #084298);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    transform: scale(1.05);
+}
+
+.btn-outline {
+    border: 2px solid #0d6efd;
+    color: #0d6efd;
+}
+
+.btn-outline:hover {
+    background: #0d6efd;
+    color: #fff;
+}
+</style>
+
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    <h1>Sistema de Aspirantes</h1>
+    <a href="/logout">Cerrar sesión</a>
+</div>
+
+<!-- CONTENIDO -->
+<div class="container">
+    <div class="card">
+        <h2>Bienvenido al Sistema</h2>
+        <p>Desde aquí puedes consultar y descargar tu ficha de registro.</p>
+
+        <a href="/ver_pdf" class="btn btn-outline">Ver Ficha (PDF)</a>
+        <a href="/descargar_pdf" class="btn btn-primary">Descargar Ficha</a>
+    </div>
+</div>
+
+</body>
+</html>

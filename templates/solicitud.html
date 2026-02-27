@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Solicitud de Ingreso</title>
+</head>
+<body>
+    <h2>Solicitud de Ficha - Aspirante</h2>
+
+    <form action="/registrar" method="post">
+        <label>Nombre:</label><br>
+        <input type="text" name="nombre" required><br><br>
+
+        <label>Apellidos:</label><br>
+        <input type="text" name="apellidos" required><br><br>
+
+        <label>Escuela de Bachillerato:</label><br>
+        <input type="text" name="bachillerato" required><br><br>
+
+        <label>Lugar de Residencia:</label><br>
+        <input type="text" name="lugar" required><br><br>
+
+        <label>Promedio de Bachillerato:</label><br>
+        <input type="number" name="promedio" step="0.01" min="6" max="10" required><br><br>
+
+        <label>Monto por Ficha:</label><br>
+        <input type="text" value="$ {{ monto }}" readonly><br><br>
+
+        <button type="submit">Generar Solicitud</button>
+    </form>
+</body>
+</html>
