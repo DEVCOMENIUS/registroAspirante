@@ -252,6 +252,43 @@ def registro():
     return render_template("registro.html")
 
 # =====================
+# VER PDF (EN NAVEGADOR)
+# =====================
+@app.route('/ver_pdf')
+@login_required
+def ver_pdf():
+    aspirante = Aspirante.query.filter_by(id=current_user.aspirante_id).first()
+    if not aspirante:
+        flash("No se encontró el aspirante.", "danger")
+        return redirect(url_for('dashboard'))
+
+    referencia = generar_referencia(aspirante.consecutivo)
+    pdf_path = generar_pdf(aspirante, referencia)
+
+    return send_file(pdf_path, as_attachment=False)
+
+
+# =====================
+# DESCARGAR PDF
+# =====================
+@app.route('/descargar_pdf')
+@login_required
+def descargar_pdf():
+    aspirante = Aspirante.query.filter_by(id=current_user.aspirante_id).first()
+    if not aspirante:
+        flash("No se encontró el aspirante.", "danger")
+        return redirect(url_for('dashboard'))
+
+    referencia = generar_referencia(aspirante.consecutivo)
+    pdf_path = generar_pdf(aspirante, referencia)
+
+    return send_file(
+        pdf_path,
+        as_attachment=True,
+        download_name=f"Ficha_{aspirante.folio}.pdf"
+    )
+
+# =====================
 # LOGIN
 # =====================
 
