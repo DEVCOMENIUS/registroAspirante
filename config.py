@@ -2,17 +2,23 @@ import os
 
 class Config:
     # ==========================
-    # CONFIGURACIÓN GENERAL
+    # SEGURIDAD
     # ==========================
-    SECRET_KEY = 'clave_super_segura_local_2026'
-    
+    SECRET_KEY = os.getenv("SECRET_KEY", "dev_key_local")
+
     # ==========================
-    # BASE DE DATOS MYSQL
-    # Usuario: root, Password vacío
-    # Host: localhost, BD: sistema_aspirantes
+    # BASE DE DATOS
     # ==========================
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:@localhost/sistema_aspirantes'
+    # En Railway usará MYSQL_URL
+    # En local usará tu MySQL localhost
+    database_url = os.getenv("MYSQL_URL")
+
+    if database_url and database_url.startswith("mysql://"):
+        database_url = database_url.replace("mysql://", "mysql+pymysql://", 1)
+
+    SQLALCHEMY_DATABASE_URI = database_url or "mysql+pymysql://root:@localhost/sistema_aspirantes"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
 
     # ==========================
     # CONFIGURACIÓN DE CORREO (GMAIL)
