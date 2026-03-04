@@ -12,25 +12,15 @@ from app.utils.helpers import (
     generar_password,
     generar_referencia
 )
+from app.services.email_service import enviar_correo
 from app.services.file_service import (
     procesar_foto_base64,
     procesar_foto_archivo,
     crear_carpeta_si_no_existe
 )
 from app.services.pdf_service import generar_pdf
-from app.services.email_service import enviar_correo
 
 registro_bp = Blueprint('registro', __name__)
-
-def enviar_correo_background(correo, password, folio, app):
-    """Enviar correo en segundo plano usando app context correcto"""
-    with app.app_context():  # ✅ Usa contexto real de la app
-        try:
-            enviar_correo(correo, password, folio)
-            print("Correo enviado correctamente")
-        except Exception as e:
-            print("⚠️ Error enviando correo:", e)
-
 
 @registro_bp.route('/registro', methods=['GET', 'POST'])
 def registro():
@@ -66,10 +56,7 @@ def registro():
             return redirect(url_for('registro.registro'))
 
         # 🔹 Convertir fecha
-        fecha_convertida = datetime.strptime(
-            request.form['fecha'],
-            "%Y-%m-%d"
-        ).date()
+        fecha_convertida = datetime.strptime(request.form['fecha'], "%Y-%m-%d").date()
 
         # 🔹 Crear Aspirante
         aspirante = Aspirante(
@@ -84,7 +71,6 @@ def registro():
             curp=request.form['curp'],
             foto=ruta_foto
         )
-
         db.session.add(aspirante)
         db.session.commit()
 
@@ -108,10 +94,10 @@ def registro():
         db.session.add(pago)
         db.session.commit()
 
-        # 🔥 Enviar correo en segundo plano
+        # 🔹 Enviar correo en segundo plano con contexto seguro
         threading.Thread(
-            target=enviar_correo_background,
-            args=(correo, password, folio, current_app._get_current_object()),  # pasamos app real
+            target=enviar_correo,
+            args=(correo, password, folio, current_app._get_current_object()),
             daemon=True
         ).start()
 
