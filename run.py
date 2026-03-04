@@ -1,4 +1,5 @@
 import os
+import socket  
 from app import create_app
 
 app = create_app()
@@ -9,7 +10,6 @@ if __name__ == "__main__":
         port=int(os.environ.get("PORT", 5000))
     )
 
-    import socket
 
 try:
     s = socket.create_connection(("smtp.gmail.com", 587), timeout=10)
