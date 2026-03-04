@@ -5,6 +5,7 @@ class Aspirante(db.Model):
     __tablename__ = 'aspirantes'
     
     id = db.Column(db.Integer, primary_key=True)
+    folio = db.Column(db.String(20), unique=True, nullable=False)
     consecutivo = db.Column(db.Integer, unique=True)
     nombre = db.Column(db.String(100), nullable=False)
     paterno = db.Column(db.String(100), nullable=False)
