@@ -1,7 +1,7 @@
 import os
 import threading
 from datetime import datetime
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, current_app
 from app import db, bcrypt
 from app.models.aspirante import Aspirante
 from app.models.usuario import Usuario
@@ -19,6 +19,7 @@ from app.services.file_service import (
     crear_carpeta_si_no_existe
 )
 from app.services.pdf_service import generar_pdf
+from sqlalchemy.exc import IntegrityError
 
 registro_bp = Blueprint('registro', __name__)
 
@@ -28,8 +29,14 @@ def registro():
         correo = request.form['correo']
         correo_confirm = request.form.get('correo_confirm', '')
 
+        # 🔹 Validar que los correos coincidan
         if correo != correo_confirm:
             flash("Los correos no coinciden.", "danger")
+            return redirect(url_for('registro.registro'))
+
+        # 🔹 Validar que el correo no exista
+        if Usuario.query.filter_by(correo=correo).first():
+            flash("Este correo ya está registrado.", "danger")
             return redirect(url_for('registro.registro'))
 
         # 🔹 Generación de datos
@@ -56,10 +63,7 @@ def registro():
             return redirect(url_for('registro.registro'))
 
         # 🔹 Convertir fecha
-        fecha_convertida = datetime.strptime(
-            request.form['fecha'],
-            "%Y-%m-%d"
-        ).date()
+        fecha_convertida = datetime.strptime(request.form['fecha'], "%Y-%m-%d").date()
 
         # 🔹 Crear Aspirante
         aspirante = Aspirante(
@@ -96,17 +100,37 @@ def registro():
 
         db.session.add(usuario)
         db.session.add(pago)
-        db.session.commit()
 
-        # 🔥 Enviar correo en segundo plano (evita WORKER TIMEOUT)
-        threading.Thread(
-            target=enviar_correo,
-            args=(correo, password, folio),
-            daemon=True
-        ).start()
+        # 🔹 Commit con manejo de duplicados por seguridad
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash("El correo ya está registrado.", "danger")
+            return redirect(url_for('registro.registro'))
+
+        # 🔹 Enviar correo en segundo plano con contexto de Flask
+        def enviar_correo_thread():
+            try:
+                app = current_app._get_current_object()
+                with app.app_context():
+                    enviar_correo(correo, password, folio)
+            except Exception as e:
+                print("⚠️ Error enviando correo:", e)
+
+        threading.Thread(target=enviar_correo_thread, daemon=True).start()
+
+        # 🔹 Crear carpeta PDFs si no existe
+        pdf_folder = "app/pdfs"
+        if not os.path.exists(pdf_folder):
+            os.makedirs(pdf_folder)
 
         # 🔹 Generar PDF
-        pdf_path = generar_pdf(aspirante, referencia)
+        pdf_path = generar_pdf(aspirante, referencia, output_folder=pdf_folder)
+
+        if not os.path.exists(pdf_path):
+            flash("Error generando el PDF.", "danger")
+            return redirect(url_for('registro.registro'))
 
         return send_file(pdf_path, as_attachment=True)
 
