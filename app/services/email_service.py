@@ -1,35 +1,32 @@
-import smtplib
-from email.message import EmailMessage
-from flask import current_app, Flask
+import os
+import requests
 
-def enviar_correo(destinatario, password, folio, app: Flask):
-    """Envía el correo usando el contexto de la app Flask"""
+def enviar_correo(destinatario, password, folio, app):
     try:
-        # Abrimos el contexto de la app dentro del thread
         with app.app_context():
-            msg = EmailMessage()
-            msg['Subject'] = 'Clave de acceso y FOLIO - Sistema Aspirantes'
-            msg['From'] = current_app.config['MAIL_USERNAME']
-            msg['To'] = destinatario
+            api_key = os.getenv("RESEND_API_KEY")
 
-            msg.set_content(f"""
-Bienvenido al Sistema de Aspirantes
+            response = requests.post(
+                "https://api.resend.com/emails",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "from": "Sistema Aspirantes <onboarding@resend.dev>",
+                    "to": destinatario,
+                    "subject": "Clave de acceso y FOLIO - Sistema Aspirantes",
+                    "html": f"""
+                    <h2>Bienvenido al Sistema de Aspirantes</h2>
+                    <p><strong>FOLIO:</strong> {folio}</p>
+                    <p><strong>Clave:</strong> {password}</p>
+                    <p>Puedes iniciar sesión en tu sistema.</p>
+                    """
+                },
+            )
 
-Su FOLIO de registro es: {folio}
-Su clave de acceso es: {password}
+            print("Status code:", response.status_code)
+            print("Response:", response.text)
 
-Puede iniciar sesión en:
-http://127.0.0.1:5000/login
-
-Guarde su folio para cualquier aclaración.
-""")
-            print(f"[INFO] Intentando enviar correo a {destinatario}...")
-
-            # Conexión segura a SMTP
-            with smtplib.SMTP(current_app.config['MAIL_SERVER'], current_app.config['MAIL_PORT']) as server:
-                server.starttls()
-                server.login(current_app.config['MAIL_USERNAME'], current_app.config['MAIL_PASSWORD'])
-                server.send_message(msg)
-                print(f"[INFO] Correo enviado correctamente a {destinatario}")
     except Exception as e:
-        print(f"⚠️ Error enviando correo: {e}")
+        print("Error enviando correo:", e)
