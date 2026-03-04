@@ -1,42 +1,36 @@
 import os
 import threading
 from datetime import datetime
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file
-from app import db, bcrypt, create_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, current_app
+from app import db, bcrypt
 from app.models.aspirante import Aspirante
 from app.models.usuario import Usuario
 from app.models.pago import Pago
-from app.utils.helpers import (
-    generar_consecutivo,
-    generar_folio,
-    generar_password,
-    generar_referencia
-)
-from app.services.file_service import (
-    procesar_foto_base64,
-    procesar_foto_archivo,
-    crear_carpeta_si_no_existe
-)
+from app.utils.helpers import generar_consecutivo, generar_folio, generar_password, generar_referencia
+from app.services.file_service import procesar_foto_base64, procesar_foto_archivo, crear_carpeta_si_no_existe
 from app.services.pdf_service import generar_pdf
+from app.services.email_service import enviar_correo
 
 registro_bp = Blueprint('registro', __name__)
-app = create_app()  # Instancia de Flask para contextos en threads
 
-# Función para enviar correo en segundo plano
-def enviar_correo_background(correo, password, folio):
-    with app.app_context():  # Contexto de aplicación necesario
+# ==========================
+# Función para enviar correo en background
+# ==========================
+def enviar_correo_background(correo, password, folio, app_context):
+    with app_context:  # ✅ Usamos contexto de la app real
         try:
-            from app.services.email_service import enviar_correo
             enviar_correo(correo, password, folio)
         except Exception as e:
             print(f"⚠️ Error enviando correo: {e}")
 
+# ==========================
+# Ruta de registro
+# ==========================
 @registro_bp.route('/registro', methods=['GET', 'POST'])
 def registro():
     if request.method == 'POST':
         correo = request.form['correo']
         correo_confirm = request.form.get('correo_confirm', '')
-
         if correo != correo_confirm:
             flash("Los correos no coinciden.", "danger")
             return redirect(url_for('registro.registro'))
@@ -53,13 +47,11 @@ def registro():
 
         preview_base64 = request.form.get('preview_base64')
         foto_file = request.files.get('foto')
-
         foto_procesada = False
         if preview_base64:
             foto_procesada = procesar_foto_base64(preview_base64, ruta_foto)
         elif foto_file and foto_file.filename != '':
             foto_procesada = procesar_foto_archivo(foto_file, ruta_foto)
-
         if not foto_procesada:
             flash("Debe subir o tomar una foto válida.", "danger")
             return redirect(url_for('registro.registro'))
@@ -85,28 +77,20 @@ def registro():
 
         # 🔹 Crear Usuario
         hash_pw = bcrypt.generate_password_hash(password).decode('utf-8')
-        usuario = Usuario(
-            aspirante_id=aspirante.id,
-            correo=correo,
-            password_hash=hash_pw
-        )
+        usuario = Usuario(aspirante_id=aspirante.id, correo=correo, password_hash=hash_pw)
 
         # 🔹 Crear Pago
         referencia = generar_referencia(consecutivo)
-        pago = Pago(
-            aspirante_id=aspirante.id,
-            referencia=referencia,
-            monto=500.00
-        )
+        pago = Pago(aspirante_id=aspirante.id, referencia=referencia, monto=500.00)
 
         db.session.add(usuario)
         db.session.add(pago)
         db.session.commit()
 
-        # 🔥 Enviar correo en segundo plano
+        # 🔹 Enviar correo en segundo plano
         threading.Thread(
             target=enviar_correo_background,
-            args=(correo, password, folio),
+            args=(correo, password, folio, current_app._get_current_object()),
             daemon=True
         ).start()
 
