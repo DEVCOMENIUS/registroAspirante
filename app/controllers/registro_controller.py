@@ -1,8 +1,8 @@
 import os
 import threading
 from datetime import datetime
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, current_app
-from app import db, bcrypt
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file
+from app import db, bcrypt, create_app
 from app.models.aspirante import Aspirante
 from app.models.usuario import Usuario
 from app.models.pago import Pago
@@ -12,7 +12,6 @@ from app.utils.helpers import (
     generar_password,
     generar_referencia
 )
-from app.services.email_service import enviar_correo
 from app.services.file_service import (
     procesar_foto_base64,
     procesar_foto_archivo,
@@ -21,6 +20,16 @@ from app.services.file_service import (
 from app.services.pdf_service import generar_pdf
 
 registro_bp = Blueprint('registro', __name__)
+app = create_app()  # Instancia de Flask para contextos en threads
+
+# Función para enviar correo en segundo plano
+def enviar_correo_background(correo, password, folio):
+    with app.app_context():  # Contexto de aplicación necesario
+        try:
+            from app.services.email_service import enviar_correo
+            enviar_correo(correo, password, folio)
+        except Exception as e:
+            print(f"⚠️ Error enviando correo: {e}")
 
 @registro_bp.route('/registro', methods=['GET', 'POST'])
 def registro():
@@ -38,7 +47,7 @@ def registro():
         password = generar_password()
 
         # 🔹 Manejo de foto
-        carpeta_fotos = os.path.abspath(os.path.join(os.getcwd(), 'static', 'fotos'))
+        carpeta_fotos = "static/fotos"
         crear_carpeta_si_no_existe(carpeta_fotos)
         ruta_foto = os.path.join(carpeta_fotos, f"{consecutivo}_foto.png")
 
@@ -94,14 +103,7 @@ def registro():
         db.session.add(pago)
         db.session.commit()
 
-        # 🔥 Enviar correo en segundo plano con application context
-        def enviar_correo_background(correo, password, folio):
-            with current_app.app_context():
-                try:
-                    enviar_correo(correo, password, folio)
-                except Exception as e:
-                    print(f"⚠️ Error enviando correo: {e}")
-
+        # 🔥 Enviar correo en segundo plano
         threading.Thread(
             target=enviar_correo_background,
             args=(correo, password, folio),
@@ -109,10 +111,10 @@ def registro():
         ).start()
 
         # 🔹 Generar PDF
+        pdf_folder = "pdfs"
+        if not os.path.exists(pdf_folder):
+            os.makedirs(pdf_folder)
         pdf_path = generar_pdf(aspirante, referencia)
-        if not os.path.exists(pdf_path):
-            flash("Error generando el PDF.", "danger")
-            return redirect(url_for('registro.registro'))
 
         return send_file(pdf_path, as_attachment=True)
 
