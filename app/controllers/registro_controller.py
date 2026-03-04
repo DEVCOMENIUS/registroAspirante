@@ -6,21 +6,20 @@ from app import db, bcrypt
 from app.models.aspirante import Aspirante
 from app.models.usuario import Usuario
 from app.models.pago import Pago
-from app.utils.helpers import (
-    generar_consecutivo,
-    generar_folio,
-    generar_password,
-    generar_referencia
-)
-from app.services.email_service import enviar_correo
-from app.services.file_service import (
-    procesar_foto_base64,
-    procesar_foto_archivo,
-    crear_carpeta_si_no_existe
-)
+from app.utils.helpers import generar_consecutivo, generar_folio, generar_password, generar_referencia
+from app.services.file_service import procesar_foto_base64, procesar_foto_archivo, crear_carpeta_si_no_existe
 from app.services.pdf_service import generar_pdf
+from app.services.email_service import enviar_correo
 
 registro_bp = Blueprint('registro', __name__)
+
+def enviar_correo_background(destinatario, password, folio):
+    """Envía el correo usando un thread y contexto de la app"""
+    try:
+        app = current_app._get_current_object()  # Obtenemos la instancia real de Flask
+        enviar_correo(destinatario, password, folio, app)
+    except Exception as e:
+        print(f"⚠️ Error en el thread de correo: {e}")
 
 @registro_bp.route('/registro', methods=['GET', 'POST'])
 def registro():
@@ -32,12 +31,12 @@ def registro():
             flash("Los correos no coinciden.", "danger")
             return redirect(url_for('registro.registro'))
 
-        # 🔹 Generación de datos
+        # Generación de datos
         consecutivo = generar_consecutivo()
         folio = generar_folio()
         password = generar_password()
 
-        # 🔹 Manejo de foto
+        # Manejo de foto
         carpeta_fotos = "static/fotos"
         crear_carpeta_si_no_existe(carpeta_fotos)
         ruta_foto = os.path.join(carpeta_fotos, f"{consecutivo}_foto.png")
@@ -55,10 +54,10 @@ def registro():
             flash("Debe subir o tomar una foto válida.", "danger")
             return redirect(url_for('registro.registro'))
 
-        # 🔹 Convertir fecha
+        # Convertir fecha
         fecha_convertida = datetime.strptime(request.form['fecha'], "%Y-%m-%d").date()
 
-        # 🔹 Crear Aspirante
+        # Crear Aspirante
         aspirante = Aspirante(
             consecutivo=consecutivo,
             folio=folio,
@@ -74,7 +73,7 @@ def registro():
         db.session.add(aspirante)
         db.session.commit()
 
-        # 🔹 Crear Usuario
+        # Crear Usuario
         hash_pw = bcrypt.generate_password_hash(password).decode('utf-8')
         usuario = Usuario(
             aspirante_id=aspirante.id,
@@ -82,7 +81,7 @@ def registro():
             password_hash=hash_pw
         )
 
-        # 🔹 Crear Pago
+        # Crear Pago
         referencia = generar_referencia(consecutivo)
         pago = Pago(
             aspirante_id=aspirante.id,
@@ -94,18 +93,17 @@ def registro():
         db.session.add(pago)
         db.session.commit()
 
-        # 🔹 Enviar correo en segundo plano con contexto seguro
+        # Enviar correo en segundo plano
         threading.Thread(
-            target=enviar_correo,
-            args=(correo, password, folio, current_app._get_current_object()),
+            target=enviar_correo_background,
+            args=(correo, password, folio),
             daemon=True
         ).start()
 
-        # 🔹 Generar PDF
+        # Generar PDF
         pdf_folder = "pdfs"
         if not os.path.exists(pdf_folder):
             os.makedirs(pdf_folder)
-
         pdf_path = generar_pdf(aspirante, referencia)
 
         return send_file(pdf_path, as_attachment=True)

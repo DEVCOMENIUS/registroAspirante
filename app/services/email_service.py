@@ -3,9 +3,8 @@ from email.message import EmailMessage
 from flask import current_app, Flask
 
 def enviar_correo(destinatario, password, folio, app: Flask):
-    """Envía el correo usando el contexto de la app Flask"""
+    """Envía correo usando SMTP SSL y contexto de Flask"""
     try:
-        # Abrimos el contexto de la app dentro del thread
         with app.app_context():
             msg = EmailMessage()
             msg['Subject'] = 'Clave de acceso y FOLIO - Sistema Aspirantes'
@@ -25,9 +24,8 @@ Guarde su folio para cualquier aclaración.
 """)
             print(f"[INFO] Intentando enviar correo a {destinatario}...")
 
-            # Conexión segura a SMTP
-            with smtplib.SMTP(current_app.config['MAIL_SERVER'], current_app.config['MAIL_PORT']) as server:
-                server.starttls()
+            # SMTP SSL (puerto 465) en vez de TLS
+            with smtplib.SMTP_SSL(current_app.config['MAIL_SERVER'], 465) as server:
                 server.login(current_app.config['MAIL_USERNAME'], current_app.config['MAIL_PASSWORD'])
                 server.send_message(msg)
                 print(f"[INFO] Correo enviado correctamente a {destinatario}")
