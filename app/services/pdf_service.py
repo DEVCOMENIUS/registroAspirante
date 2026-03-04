@@ -5,15 +5,18 @@ from reportlab.pdfgen import canvas
 def generar_pdf(aspirante, referencia):
     """
     Genera un PDF con los datos del aspirante y referencia de pago.
-    Devuelve la ruta del PDF generado.
+    Devuelve la ruta absoluta del PDF generado.
     """
-    # Crear carpeta 'pdfs' si no existe
-    pdf_folder = "pdfs"
+
+    # Carpeta de PDFs en la raíz del proyecto
+    pdf_folder = os.path.abspath(os.path.join(os.getcwd(), 'pdfs'))
     if not os.path.exists(pdf_folder):
         os.makedirs(pdf_folder)
 
     # Ruta del PDF
     ruta_pdf = os.path.join(pdf_folder, f"solicitud_{aspirante.consecutivo}.pdf")
+
+    # Crear canvas
     c = canvas.Canvas(ruta_pdf, pagesize=letter)
 
     # Datos principales
@@ -27,7 +30,10 @@ def generar_pdf(aspirante, referencia):
 
     # Foto (si existe)
     if aspirante.foto and os.path.exists(aspirante.foto):
-        c.drawImage(aspirante.foto, 400, 650, width=120, height=120)
+        try:
+            c.drawImage(aspirante.foto, 400, 650, width=120, height=120)
+        except Exception:
+            pass  # no fallar si la imagen no se carga
 
     c.save()
     return ruta_pdf

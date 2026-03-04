@@ -6,11 +6,19 @@ from app import db, bcrypt
 from app.models.aspirante import Aspirante
 from app.models.usuario import Usuario
 from app.models.pago import Pago
-from app.utils.helpers import generar_consecutivo, generar_folio, generar_password, generar_referencia
+from app.utils.helpers import (
+    generar_consecutivo,
+    generar_folio,
+    generar_password,
+    generar_referencia
+)
 from app.services.email_service import enviar_correo
-from app.services.file_service import procesar_foto_base64, procesar_foto_archivo, crear_carpeta_si_no_existe
+from app.services.file_service import (
+    procesar_foto_base64,
+    procesar_foto_archivo,
+    crear_carpeta_si_no_existe
+)
 from app.services.pdf_service import generar_pdf
-from sqlalchemy.exc import IntegrityError
 
 registro_bp = Blueprint('registro', __name__)
 
@@ -20,23 +28,17 @@ def registro():
         correo = request.form['correo']
         correo_confirm = request.form.get('correo_confirm', '')
 
-        # Validar correos
         if correo != correo_confirm:
             flash("Los correos no coinciden.", "danger")
             return redirect(url_for('registro.registro'))
 
-        # Validar que el correo no exista
-        if Usuario.query.filter_by(correo=correo).first():
-            flash("Este correo ya está registrado.", "danger")
-            return redirect(url_for('registro.registro'))
-
-        # Generar datos
+        # 🔹 Generación de datos
         consecutivo = generar_consecutivo()
         folio = generar_folio()
         password = generar_password()
 
-        # Manejo de foto
-        carpeta_fotos = "static/fotos"
+        # 🔹 Manejo de foto
+        carpeta_fotos = os.path.abspath(os.path.join(os.getcwd(), 'static', 'fotos'))
         crear_carpeta_si_no_existe(carpeta_fotos)
         ruta_foto = os.path.join(carpeta_fotos, f"{consecutivo}_foto.png")
 
@@ -53,10 +55,10 @@ def registro():
             flash("Debe subir o tomar una foto válida.", "danger")
             return redirect(url_for('registro.registro'))
 
-        # Convertir fecha
+        # 🔹 Convertir fecha
         fecha_convertida = datetime.strptime(request.form['fecha'], "%Y-%m-%d").date()
 
-        # Crear Aspirante
+        # 🔹 Crear Aspirante
         aspirante = Aspirante(
             consecutivo=consecutivo,
             folio=folio,
@@ -69,11 +71,10 @@ def registro():
             curp=request.form['curp'],
             foto=ruta_foto
         )
-
         db.session.add(aspirante)
         db.session.commit()
 
-        # Crear Usuario
+        # 🔹 Crear Usuario
         hash_pw = bcrypt.generate_password_hash(password).decode('utf-8')
         usuario = Usuario(
             aspirante_id=aspirante.id,
@@ -81,7 +82,7 @@ def registro():
             password_hash=hash_pw
         )
 
-        # Crear Pago
+        # 🔹 Crear Pago
         referencia = generar_referencia(consecutivo)
         pago = Pago(
             aspirante_id=aspirante.id,
@@ -91,34 +92,24 @@ def registro():
 
         db.session.add(usuario)
         db.session.add(pago)
+        db.session.commit()
 
-        # Commit con manejo de errores
-        try:
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            flash("El correo ya está registrado.", "danger")
-            return redirect(url_for('registro.registro'))
+        # 🔥 Enviar correo en segundo plano con application context
+        def enviar_correo_background(correo, password, folio):
+            with current_app.app_context():
+                try:
+                    enviar_correo(correo, password, folio)
+                except Exception as e:
+                    print(f"⚠️ Error enviando correo: {e}")
 
-        # Enviar correo en segundo plano con configuración directa
-        def enviar_correo_thread():
-            try:
-                config = {
-                    "MAIL_SERVER": current_app.config["MAIL_SERVER"],
-                    "MAIL_PORT": current_app.config["MAIL_PORT"],
-                    "MAIL_USE_TLS": current_app.config["MAIL_USE_TLS"],
-                    "MAIL_USERNAME": current_app.config["MAIL_USERNAME"],
-                    "MAIL_PASSWORD": current_app.config["MAIL_PASSWORD"]
-                }
-                enviar_correo(correo, password, folio, config)
-            except Exception as e:
-                print("⚠️ Error enviando correo:", e)
+        threading.Thread(
+            target=enviar_correo_background,
+            args=(correo, password, folio),
+            daemon=True
+        ).start()
 
-        threading.Thread(target=enviar_correo_thread, daemon=True).start()
-
-        # Generar PDF
+        # 🔹 Generar PDF
         pdf_path = generar_pdf(aspirante, referencia)
-
         if not os.path.exists(pdf_path):
             flash("Error generando el PDF.", "danger")
             return redirect(url_for('registro.registro'))
