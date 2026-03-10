@@ -95,11 +95,12 @@ def registro():
         db.session.commit()
 
         # 🔹 Enviar correo en segundo plano con contexto seguro
+
         threading.Thread(
-            target=enviar_correo,
-            args=(correo, password, folio()),
-            daemon=True
-        ).start()
+    target=enviar_correo,
+    args=(correo, password, folio),  # <- sin paréntesis
+    daemon=True
+).start()
 
         # 🔹 Generar PDF
         pdf_folder = "pdfs"
