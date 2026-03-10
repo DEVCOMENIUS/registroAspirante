@@ -14,7 +14,7 @@ def enviar_correo(destinatario, password, folio):
 
     try:
         requests.post(
-            "https://api-correo-8f7m.onrender.com/",
+            "https://api-correo-8f7m.onrender.com/enviar",  # <- aquí tu microservicio
             json=payload,
             timeout=10
         )
