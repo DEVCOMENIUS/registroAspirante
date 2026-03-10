@@ -16,7 +16,7 @@ def enviar_correo(destinatario, password, folio):
         requests.post(
             "https://api-correo-8f7m.onrender.com/enviar",  # <- aquí tu microservicio
             json=payload,
-            timeout=10
+            timeout=60
         )
     except Exception as e:
         print("Error enviando correo:", e)
