@@ -82,7 +82,7 @@ def registro():
             password_hash=hash_pw
         )
 
-        # Crear Pago
+        # 🔹 Crear Pago
         referencia = generar_referencia(consecutivo)
         pago = Pago(
             aspirante_id=aspirante.id,
@@ -95,12 +95,11 @@ def registro():
         db.session.commit()
 
         # 🔹 Enviar correo en segundo plano con contexto seguro
-
         threading.Thread(
-    target=enviar_correo,
-    args=(correo, password, folio),  # <- sin paréntesis
-    daemon=True
-).start()
+            target=enviar_correo,
+            args=(correo, password, folio, current_app._get_current_object()),
+            daemon=True
+        ).start()
 
         # 🔹 Generar PDF
         pdf_folder = "pdfs"
